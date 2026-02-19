@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keke Nebula Search</title>
+    <link rel="icon" type="image/jpg" href="./kekeke.jpg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a, #2a2a2a);
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 添加背景模糊粒子效果 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(100, 100, 255, 0.1) 0%, transparent 20%),
+                        radial-gradient(circle at 90% 80%, rgba(255, 100, 100, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            min-height: 95vh;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* 容器内添加装饰性渐变边框 */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            padding: 1px;
+            background: linear-gradient(45deg, rgba(100, 100, 255, 0.5), rgba(255, 100, 100, 0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            animation: slideDown 0.5s ease;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInScale 0.6s ease;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            animation: rotateIn 0.8s ease;
+        }
+
+        .version-info {
+            color: #aaaaaa;
+            font-size: 0.9rem;
+            text-align: right;
+            white-space: nowrap;
+            animation: fadeIn 0.6s ease 0.2s both;
+        }
+
+        .author-info {
+            color: #888888;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+
+        .license-info {
+            color: #888888;
+            font-size: 0.7rem;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease 0.3s both;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            overflow-y: auto;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: linear-gradient(45deg, rgba(100, 100, 255, 0.05), rgba(255, 100, 100, 0.05));
+            pointer-events: none;
+        }
+
+        .right-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            overflow-y: auto;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: linear-gradient(45deg, rgba(100, 100, 255, 0.05), rgba(255, 100, 100, 0.05));
+            pointer-events: none;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #cccccc;
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+        
+        .description:hover {
+            background: rgba(40, 40, 40, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-box {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: fadeIn 0.6s ease 0.5s both;
+        }
+
+        .info-title {
+            color: #ffaaaa;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .info-content {
+            line-height: 1.4;
+            color: #cccccc;
+            font-size: 0.85rem;
+        }
+
+        .input-section {
+            background: rgba(40, 40, 40, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: fadeIn 0.6s ease 0.6s both;
+        }
+
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #ffffff;
+            font-size: 0.95rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+        }
+
+        select:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(25, 25, 25, 0.6);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 8px;
+            color: #000000;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.6s ease 0.7s both;
+        }
+
+        button:hover {
+            background: rgba(240, 240, 240, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+        }
+
+        .results {
+            flex: 1;
+            overflow-y: auto;
+            animation: fadeIn 0.6s ease 0.8s both;
+        }
+
+        .result-item {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.3s ease-in;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(35, 35, 35, 0.5);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .result-format {
+            color: #cccccc;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
+        .result-date {
+            color: #bbbbbb;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .result-link {
+            color: #ffffff;
+            text-decoration: none;
+            word-break: break-all;
+            display: block;
+            margin-top: 4px;
+            padding: 6px;
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+            background: rgba(40, 40, 40, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(3px);
+        }
+
+        .note {
+            color: #888888;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #888888;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .empty-text {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .apod-container {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .apod-title {
+            font-size: 1.4rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .apod-date {
+            color: #cccccc;
+            text-align: center;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .apod-image {
+            width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .apod-image:hover {
+            transform: scale(1.02);
+        }
+
+        .apod-caption {
+            color: #bbbbbb;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        .hubble-container {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .hubble-title {
+            font-size: 1.4rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .hubble-date {
+            color: #cccccc;
+            text-align: center;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .hubble-image {
+            width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .hubble-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.6s ease 0.9s both;
+        }
+
+        .image-toggle-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-toggle-btn.active {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .image-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .image-toggle-btn:active {
+            transform: scale(0.98);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888888;
+            animation: pulse 1.5s infinite;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 20px;
+            background: rgba(100, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 0.3 ease;
+        }
+
+        .modal-content {
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* 更新弹窗样式 */
+        .update-modal .modal-content {
+            max-width: 600px;
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(40, 40, 40, 0.9));
+        }
+
+        .update-title {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+            animation: fadeInScale 0.6s ease;
+        }
+
+        .update-version {
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .update-date {
+            color: #cccccc;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .update-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .update-list li {
+            padding: 10px 0;
+            color: #cccccc;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .update-list li:last-child {
+            border-bottom: none;
+        }
+
+        .update-list li::before {
+            content: "•";
+            color: #4caf50;
+            display: inline-block;
+            width: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(40, 40, 40, 0.4);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            margin: 0;
+            color: #cccccc;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .modal-button.primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000000;
+            font-weight: bold;
+        }
+
+        .modal-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-button.primary:hover {
+            background: rgba(240, 240, 240, 0.9);
+        }
+
+        .ai-assist-note {
+            color: #888888;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 针对小屏幕的弹窗优化 */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 20px;
+                max-height: 85vh;
+                top: 5vh;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .update-date {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 98%;
+                margin: 2% auto;
+                padding: 15px;
+                max-height: 90vh;
+                top: 2vh;
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: sticky;
+            right: 15px;
+            top: 10px;
+            transition: color 0.3s ease;
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #fff;
+        }
+
+        .modal-title {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-content p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+
+        .modal-content strong {
+            color: #ffaaaa;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideInUpdate {
+            from { transform: scale(0.8) translateY(50px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .update-modal .modal-content {
+            animation: slideInUpdate 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 滚动条样式 - 移除隐藏滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 30, 30, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(30, 30, 30, 0.3);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes rotateIn {
+            from { opacity: 0; transform: rotate(-180deg) scale(0.5); }
+            to { opacity: 1; transform: rotate(0deg) scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .version-info {
+                text-align: left;
+                font-size: 0.8rem;
+            }
+            
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 15px;
+                min-height: auto;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .input-section {
+                padding: 15px;
+            }
+            
+            .description {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+            
+            .result-link {
+                font-size: 0.8rem;
+                word-break: break-word;
+            }
+            
+            .left-panel, .right-panel {
+                min-height: 300px;
+            }
+            
+            .results {
+                min-height: 200px;
+            }
+            
+            .apod-image, .hubble-image {
+                max-height: 40vh;
+            }
+            
+            .image-controls {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .version-info {
+                font-size: 0.75rem;
+            }
+            
+            .author-info, .contact-info {
+                font-size: 0.7rem;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .input-section {
+                padding: 12px;
+            }
+            
+            select {
+                padding: 8px;
+            }
+            
+            button {
+                padding: 10px;
+            }
+            
+            .result-item {
+                padding: 12px;
+            }
+            
+            .apod-container, .hubble-container {
+                padding: 15px;
+            }
+            
+            .apod-title, .hubble-title {
+                font-size: 1.2rem;
+            }
+            
+            .logo {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .image-toggle-btn {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* 针对小屏幕设备的额外优化 */
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+                border-radius: 15px;
+            }
+            
+            .left-panel, .right-panel {
+                padding: 15px;
+            }
+            
+            .main-layout {
+                gap: 15px;
+            }
+            
+            .input-row {
+                gap: 10px;
+            }
+            
+            .input-group {
+                margin-bottom: 8px;
+            }
+            
+            .result-item {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <h1>
+                <img src="./kekeke.jpg" alt="Logo" class="logo">
+                Keke Nebula Search
+            </h1>
+            <div class="version-info">
+                版本: 1.5
+                <div class="author-info">作者: 落梦陳</div>
+                <div class="license-info">许可: MIT License</div>
+            </div>
+        </div>
+        
+        <div class="main-layout">
+            <div class="left-panel">
+                <div class="description" onclick="showInfoModal()">
+                    <span id="shortDescription">点击此处了解使用说明</span>
+                </div>
+
+                <div class="input-section">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="yearSelect">年份</label>
+                            <select id="yearSelect">
+                                <!-- 年份选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="monthSelect">月份</label>
+                            <select id="monthSelect">
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="daySelect">日期</label>
+                            <select id="daySelect">
+                                <!-- 日期选项将通过JavaScript动态生成 -->
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="queryImages()">查询星云图</button>
+                </div>
+
+                <div class="results" id="results">
+                    <div class="empty-state">
+                        <div class="empty-text">请选择日期并点击查询按钮<br>开始探索宇宙之美</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div id="imageControls" class="image-controls">
+                    <button id="apodBtn" class="image-toggle-btn active" onclick="switchImage('apod')">APOD照片</button>
+                    <button id="hubbleBtn" class="image-toggle-btn" onclick="switchImage('hubble')">哈勃生日天体照片</button>
+                </div>
+                
+                <div id="imageDisplay" class="empty-state">
+                    <div class="empty-text">
+                        选择日期后<br>
+                        图片将在此显示
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更新弹窗 -->
+    <div id="updateModal" class="modal update-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateModal()">&times;</span>
+            <h2 class="update-title">更新日志</h2>
+            <div class="update-version">版本 1.5</div>
+            <div class="update-date">2026/2/14 20:16</div>
+            <ul class="update-list">
+                <li>优化了部分内容</li>
+                <li>优化年份最大选择</li>
+                <li>优化了更新日志弹窗</li>
+                <li>优化了照片适配更多格式</li>
+                <li>添加了哈勃生日天体1~4月的照片</li>
+            </ul>
+            <div class="checkbox-container">
+                <input type="checkbox" id="dontShowAgain" onchange="toggleDontShowAgain()">
+                <label for="dontShowAgain">7天内不再显示此更新提醒</label>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button primary" onclick="closeUpdateModal()">确认</button>
+                <div class="ai-assist-note">网站代码通过千问AI辅助完成</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeInfoModal()">&times;</span>
+            <h2 class="modal-title">使用说明</h2>
+            <p><strong>NASA每日一图 (APOD)</strong></p>
+            <p>• APOD (Astronomy Picture of the Day) 是 NASA 自1995年起每日发布的天文图片</p>
+            <p>• 每日提供一张精选的天文图片及详细解说，涵盖行星、恒星、星系、星云等各种天体图像</p>
+            <p>• 格式为 yymmdd (如 090721)，从1995年开始每日都有发布</p>
+            <p>• 由NASA专业团队精心挑选和解说，内容权威丰富</p>
+            <br>
+            <p><strong>哈勃生日天体照片</strong></p>
+            <p>• 展示哈勃太空望远镜在特定日期拍摄的精彩图像</p>
+            <p>• 格式为 month-day (如 july-21)，仅包含特定日期的精选图片</p>
+            <p>• 包含大量深空天体的高清影像，展现哈勃望远镜的卓越观测能力</p>
+            <p>• 提供独特的视角观察宇宙深处的壮丽景象</p>
+            <br>
+            <p><strong>使用技巧</strong></p>
+            <p>• 选择您感兴趣的日期，点击"查询星云图"按钮</p>
+            <p>• 左侧将显示对应的链接，右侧将展示图片详情</p>
+            <p>• 可在右侧面板切换查看APOD和哈勃生日图片</p>
+            <p>• 探索不同日期的宇宙奇观，发现星空之美</p>
+            <br>
+            <h3 class="modal-title">MIT 开源许可</h3>
+            <p>本项目采用 MIT 许可证:</p>
+            <pre style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; font-size: 0.8rem;">
+MIT License
+
+Copyright (c) 2026 落梦陳
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        // 已配置的API密钥
+        const API_KEY = "xdjhRfzSCASlDE7CkwydojHwSrSv0RFFmQVFtAXw";
+        
+        // 存储当前显示的图片类型
+        let currentImageType = 'apod';
+        let apodData = null;
+        let hubbleImageData = null;
+        
+        // 月份英文映射
+        const monthNames = [
+            '', 'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        const monthNamesLower = [
+            '', 'january', 'february', 'march', 'april', 'may', 'june',
+            'july', 'august', 'september', 'october', 'november', 'december'
+        ];
+
+        // 动态生成年份选项 (1995-2026)
+        function populateYears() {
+            const yearSelect = document.getElementById('yearSelect');
+            
+            for (let year = 1995; year <= 2026; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '年';
+                // 设置默认值为2008年
+                if (year === 2008) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // 动态生成日期选项
+        function populateDays(month, year) {
+            const daySelect = document.getElementById('daySelect');
+            daySelect.innerHTML = ''; // 清空现有选项
+            
+            // 获取该月最大天数
+            const daysInMonth = new Date(year, month, 0).getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const option = document.createElement('option');
+                option.value = day;
+                option.textContent = day + '日';
+                // 设置默认值为9月4日
+                if (day === 4 && month === 9 && year === 2008) {
+                    option.selected = true;
+                }
+                daySelect.appendChild(option);
+            }
+        }
+
+        // 当月份改变时重新生成日期选项
+        document.getElementById('monthSelect').addEventListener('change', function() {
+            const selectedYear = parseInt(document.getElementById('yearSelect').value);
+            const selectedMonth = parseInt(this.value);
+            populateDays(selectedMonth, selectedYear);
+        });
+
+        // 当年份改变时重新生成日期选项
+        document.getElementById('yearSelect').addEventListener('change', function() {
+            const selectedYear = parseInt(this.value);
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            populateDays(selectedMonth, selectedYear);
+        });
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            populateYears();
+            // 默认选择9月（第9个月）
+            document.getElementById('monthSelect').value = 9;
+            // 根据默认年份和月份生成日期选项
+            populateDays(9, 2008);
+            
+            // 检查是否需要显示更新弹窗
+            checkShowUpdateModal();
+        });
+
+        function formatDate(year, month, day) {
+            // 将日期转换为yymmdd格式 (如 090721)
+            const yearStr = year.toString().slice(-2);
+            const monthStr = String(month).padStart(2, '0');
+            const dayStr = String(day).padStart(2, '0');
+            return yearStr + monthStr + dayStr;
+        }
+
+        function formatMonthDay(month, day) {
+            // 将月份数字转换为英文名
+            const monthName = monthNamesLower[month];
+            return `${monthName}-${day}`;
+        }
+
+        async function fetchApodImage(date) {
+            try {
+                const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return data;
+                } else {
+                    throw new Error(data.msg || 'API请求失败');
+                }
+            } catch (error) {
+                console.error('获取APOD数据时出错:', error);
+                return null;
+            }
+        }
+
+        // 获取本地哈勃生日图片 - 支持多种格式
+        function getHubbleImagePath(month, day) {
+            const monthName = monthNames[month].toLowerCase();
+            const formats = ['jpg', 'png', 'jpeg', 'gif'];
+            
+            for (const format of formats) {
+                const fileName = `${monthName}-${day}.${format}`;
+                // 返回第一个匹配的文件路径
+                if (checkFileExists(`./${monthNames[month]}/${fileName}`)) {
+                    return `./${monthNames[month]}/${fileName}`;
+                }
+            }
+            
+            // 如果没有找到对应文件，返回null
+            return null;
+        }
+
+        // 检查文件是否存在（通过创建Image对象的方式）
+        function checkFileExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        // 验证本地图片是否存在
+        async function checkImageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        // 尝试加载多种格式的哈勃图片
+        async function loadHubbleImage(month, day) {
+            const monthName = monthNames[month].toLowerCase();
+            const formats = ['jpg', 'png', 'jpeg', 'gif'];
+            
+            for (const format of formats) {
+                const imagePath = `./${monthNames[month]}/${monthName}-${day}.${format}`;
+                const exists = await checkImageExists(imagePath);
+                
+                if (exists) {
+                    return {
+                        title: `哈勃生日天体照片 - ${monthNames[month]} ${day}日`,
+                        date: `${monthNames[month]} ${day}`,
+                        url: imagePath,
+                        explanation: `这是哈勃太空望远镜在${monthNames[month]} ${day}日拍摄的精选天体照片。`
+                    };
+                }
+            }
+            
+            // 如果所有格式都不存在，则返回无图片信息
+            return {
+                title: `哈勃生日天体照片 - ${monthNames[month]} ${day}日`,
+                date: `${monthNames[month]} ${day}`,
+                url: null,
+                explanation: `抱歉，未能找到哈勃太空望远镜在${monthNames[month]} ${day}日拍摄的图片。`
+            };
+        }
+
+        function displayApodImage(data) {
+            if (!data) {
+                return `
+                    <div class="apod-container">
+                        <h3 class="apod-title">${data.title}</h3>
+                        <div class="apod-date">${data.date}</div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 20px; text-align: center; border-radius: 8px;">
+                            <p>视频内容: ${data.title}</p>
+                            <p>此日期的内容为视频，无法在此显示</p>
+                            <a href="${data.url}" target="_blank" style="color: #ffffff; text-decoration: underline;">点击观看视频</a>
+                        </div>
+                        <p class="apod-caption">${data.explanation}</p>
+                    </div>
+                `;
+            }
+
+            // 检查是否为视频类型
+            if (data.media_type === 'video') {
+                return `
+                    <div class="apod-container">
+                        <h3 class="apod-title">${data.title}</h3>
+                        <div class="apod-date">${data.date}</div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 20px; text-align: center; border-radius: 8px;">
+                            <p>视频内容: ${data.title}</p>
+                            <p>此日期的内容为视频，无法在此显示</p>
+                            <a href="${data.url}" target="_blank" style="color: #ffffff; text-decoration: underline;">点击观看视频</a>
+                        </div>
+                        <p class="apod-caption">${data.explanation}</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="apod-container">
+                    <h3 class="apod-title">${data.title}</h3>
+                    <div class="apod-date">${data.date}</div>
+                    <img src="${data.url}" alt="${data.title}" class="apod-image">
+                    <p class="apod-caption">${data.explanation}</p>
+                </div>
+            `;
+        }
+
+        function displayHubbleImage(data) {
+            if (!data) {
+                return `
+                    <div class="error-message">
+                        <p>获取哈勃图片数据失败</p>
+                    </div>
+                `;
+            }
+
+            if (!data.url) {
+                return `
+                    <div class="hubble-container">
+                        <h3 class="hubble-title">${data.title}</h3>
+                        <div class="hubble-date">${data.date}</div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 20px; text-align: center; border-radius: 8px;">
+                            <p>未找到对应图片</p>
+                            <p>${data.explanation}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="hubble-container">
+                    <h3 class="hubble-title">${data.title}</h3>
+                    <div class="hubble-date">${data.date}</div>
+                    <img src="${data.url}" alt="${data.title}" class="hubble-image">
+                    <p class="apod-caption">${data.explanation}</p>
+                </div>
+            `;
+        }
+
+        // 切换图片显示
+        function switchImage(type) {
+            currentImageType = type;
+            
+            // 更新按钮状态
+            document.getElementById('apodBtn').classList.toggle('active', type === 'apod');
+            document.getElementById('hubbleBtn').classList.toggle('active', type === 'hubble');
+            
+            // 显示对应图片
+            const imageDisplay = document.getElementById('imageDisplay');
+            if (type === 'apod' && apodData) {
+                imageDisplay.innerHTML = displayApodImage(apodData);
+                imageDisplay.className = ''; // 移除居中样式
+            } else if (type === 'hubble' && hubbleImageData) {
+                imageDisplay.innerHTML = displayHubbleImage(hubbleImageData);
+                imageDisplay.className = ''; // 移除居中样式
+            }
+        }
+
+        async function queryImages() {
+            const year = parseInt(document.getElementById('yearSelect').value);
+            const month = parseInt(document.getElementById('monthSelect').value);
+            const day = parseInt(document.getElementById('daySelect').value);
+
+            if (!year || !month || !day) {
+                alert('请选择完整的日期！');
+                return;
+            }
+
+            // 格式化日期为YYYY-MM-DD
+            const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const formattedDateShort = formatDate(year, month, day);
+            const monthDayFormat = formatMonthDay(month, day);
+
+            // 显示左侧加载状态
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">加载中...</div>';
+
+            // 显示右侧加载状态
+            const imageDisplay = document.getElementById('imageDisplay');
+            imageDisplay.innerHTML = '<div class="loading">图片加载中...</div>';
+            imageDisplay.className = 'empty-state'; // 保持居中样式
+
+            // 获取APOD数据
+            apodData = await fetchApodImage(formattedDate);
+            
+            // 获取哈勃生日图片数据
+            hubbleImageData = await loadHubbleImage(month, day);
+
+            // 构建两个查询链接
+            const apodLink = `https://apod.nasa.gov/apod/ap${formattedDateShort}.html`;
+            const hubbleLink = `https://imagine.gsfc.nasa.gov/hst_bday/${monthDayFormat}`;
+
+            // 更新左侧结果列表
+            resultsDiv.innerHTML = `
+                <div class="result-item">
+                    <div class="result-title">APOD照片</div>
+                    <div class="result-format">格式: ${formattedDateShort} (yymmdd)</div>
+                    <div class="result-date">日期: ${year}年${month}月${day}日</div>
+                    <a href="${apodLink}" target="_blank" class="result-link">${apodLink}</a>
+                    <div class="note">提示: APOD从1995年开始每日都会发布一张天文图片</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">哈勃生日天体照片</div>
+                    <div class="result-format">格式: ${monthDayFormat} (month-day)</div>
+                    <div class="result-date">日期: ${month}月${day}日</div>
+                    <a href="${hubbleLink}" target="_blank" class="result-link">${hubbleLink}</a>
+                    <div class="note">提示: 此链接包含特定日期的精选哈勃望远镜图片</div>
+                </div>
+            `;
+
+            // 根据当前选择显示图片
+            if (currentImageType === 'apod') {
+                imageDisplay.innerHTML = displayApodImage(apodData);
+                imageDisplay.className = ''; // 移除居中样式
+            } else {
+                imageDisplay.innerHTML = displayHubbleImage(hubbleImageData);
+                imageDisplay.className = ''; // 移除居中样式
+            }
+        }
+
+        // 弹窗相关函数
+        function showInfoModal() {
+            document.getElementById('infoModal').style.display = 'block';
+        }
+
+        function closeInfoModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+
+        // 更新弹窗相关函数
+        function checkShowUpdateModal() {
+            const dontShowAgain = localStorage.getItem('dontShowUpdateModal');
+            if (!dontShowAgain) {
+                document.getElementById('updateModal').style.display = 'block';
+            } else {
+                const lastShown = new Date(dontShowAgain);
+                const now = new Date();
+                const diffTime = Math.abs(now - lastShown);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays >= 7) {
+                    document.getElementById('updateModal').style.display = 'block';
+                }
+            }
+        }
+
+        function toggleDontShowAgain() {
+            const checkbox = document.getElementById('dontShowAgain');
+            if (checkbox.checked) {
+                localStorage.setItem('dontShowUpdateModal', new Date().toISOString());
+            } else {
+                localStorage.removeItem('dontShowUpdateModal');
+            }
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').style.display = 'none';
+        }
+
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            const infoModal = document.getElementById('infoModal');
+            const updateModal = document.getElementById('updateModal');
+            
+            if (event.target == infoModal) {
+                infoModal.style.display = 'none';
+            }
+            
+            if (event.target == updateModal) {
+                updateModal.style.display = 'none';
+            }
+        }
+        
+        // 监听键盘事件，ESC键关闭弹窗
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeInfoModal();
+                closeUpdateModal();
+            }
+        });
+    </script>
+</body>
+</html>
